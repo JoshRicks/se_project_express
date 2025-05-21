@@ -1,0 +1,34 @@
+{
+  "name": "se_project_express",
+  "version": "1.0.0",
+  "description": "Backend Server for WTWR",
+  "main": "app.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoshRicks/se_project_express.git"
+  },
+  "author": "Josh Ricks",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JoshRicks/se_project_express/issues"
+  },
+  "homepage": "https://github.com/JoshRicks/se_project_express#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.15.0",
+    "validator": "^13.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-import": "^2.31.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^2.8.8"
+  }
+}
