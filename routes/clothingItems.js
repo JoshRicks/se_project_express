@@ -1,36 +1,24 @@
 const router = require("express").Router();
-const clothingItem = require("../models/clothingItem");
+const {
+  getClothingItem,
+  createClothingItem,
+  deleteClothingItem,
+  likeItem,
+  dislikeItem,
+} = require("../controllers/clothingItems");
 
-router.get("/items", (req, res) => {
-  clothingItem
-    .find({})
-    .then((clothingItems) => res.send({ data: clothingItems }))
-    .catch(() => res.status(500).send({ message: "Error" }));
-});
+router.get("/", getClothingItem);
 
-router.post("/items", (req, res) => {
-  const { name, weather, imageUrl } = req.body;
+router.post("/", createClothingItem);
 
-  clothingItem
-    .create({ name, weather, imageUrl, owner: req.user._id })
-    .then((clothingItems) => res.send({ data: clothingItems }))
-    .catch(() => res.status(500).send({ message: "Error" }));
-});
+router.delete("/:itemId", deleteClothingItem);
 
-router.delete("/items/:itemId", (req, res) => {
-  clothingItem
-    .findByIdAndRemove(req.params.itemId)
-    .then((clothingItems) => {
-      if (!clothingItems) {
-        res.status(404).send({ message: "Requested resource not found" });
-      } else {
-        res.send({ data: clothingItems });
-      }
-    })
-    .catch(() => res.status(500).send({ message: "Error" }));
-});
+router.put("/:itemId/likes", likeItem);
+
+router.delete("/:itemId/likes", dislikeItem);
 
 router.use((req, res) => {
+  console.error();
   res.status(404).send({ message: "Requested resource not found" });
 });
 
