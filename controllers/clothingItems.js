@@ -17,7 +17,7 @@ const getClothingItem = (req, res) => {
       }
       return res.status(200).send(items);
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 const createClothingItem = (req, res) => {
@@ -26,7 +26,7 @@ const createClothingItem = (req, res) => {
   if (!req.body.name || req.body.name.trim() === "") {
     return res.status(BAD_DATA_REQUEST).json({ message: "Name is required" });
   }
-  if (!req.body.weatherType || req.body.weatherType.trim() === "") {
+  if (!req.body.weather || req.body.weather.trim() === "") {
     return res
       .status(BAD_DATA_REQUEST)
       .json({ message: "Weather type is required" });
@@ -38,26 +38,40 @@ const createClothingItem = (req, res) => {
   }
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
-    .orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
-    })
     .then((clothingItems) => res.status(201).send({ data: clothingItems }))
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 const deleteClothingItem = (req, res) => {
-  ClothingItem.findByIdAndRemove(req.params.itemId)
-    .then((clothingItems) => {
-      if (!clothingItems) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Requested clothing item not found" });
+  const { itemId } = req.params;
+
+  if (!itemId) {
+    return res
+      .status(BAD_DATA_REQUEST)
+      .json({ message: "Item ID is required" });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res
+      .status(BAD_DATA_REQUEST)
+      .json({ message: "Invalid item ID format" });
+  }
+
+  ClothingItem.findById(itemId)
+    .then((clothingItem) => {
+      if (!clothingItem) {
+        return res.status(NOT_FOUND).json({ message: "Item not Found" });
       }
-      return res.status(200).send({ data: clothingItems });
+      if (clothingItem.owner.toString() !== req.user._id) {
+        return res
+          .status(BAD_DATA_REQUEST)
+          .json({ message: "You do not have permission to delete this item" });
+      }
+      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) => {
+        res.status(200).send({ data: deletedItem });
+      });
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 const likeItem = (req, res) => {
@@ -84,8 +98,9 @@ const likeItem = (req, res) => {
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
+
 const dislikeItem = (req, res) => {
   if (!req.params.itemId) {
     return res
@@ -110,7 +125,7 @@ const dislikeItem = (req, res) => {
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 module.exports = {

@@ -10,14 +10,10 @@ const errorCatcher = (err, res) => {
       .send({ message: "Database connection error" });
   }
   if (err.name === "CastError") {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .send({ message: "Invalid query format" });
+    return res.status(BAD_DATA_REQUEST).send({ message: err.message });
   }
   if (err.name === "ValidationError") {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .send({ message: "Invalid data in query" });
+    return res.status(BAD_DATA_REQUEST).send({ message: err.message });
   }
   return res
     .status(SERVER_ERROR)

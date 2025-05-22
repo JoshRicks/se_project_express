@@ -13,7 +13,7 @@ const getUsers = (req, res) => {
       }
       return res.status(200).send(users);
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 const getUsersById = (req, res) => {
@@ -21,10 +21,11 @@ const getUsersById = (req, res) => {
     .then((user) => {
       if (!user) {
         res.status(NOT_FOUND).send({ message: "Requested user not found" });
+      } else {
+        return res.status(200).send({ data: user });
       }
-      return res.status(200).send({ data: user });
     })
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 const createUser = (req, res) => {
@@ -38,13 +39,8 @@ const createUser = (req, res) => {
       .json({ message: "Avatar URL is required" });
   }
   User.create({ name, avatar })
-    .orFail(() => {
-      const error = new Error("User not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
-    })
     .then((user) => res.status(201).send(user))
-    .catch(errorCatcher);
+    .catch((err) => errorCatcher(err, res));
 };
 
 module.exports = {
