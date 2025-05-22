@@ -22,7 +22,7 @@ const getUsersById = (req, res) => {
       if (!user) {
         res.status(NOT_FOUND).send({ message: "Requested user not found" });
       } else {
-        return res.status(200).send({ data: user });
+        res.status(200).send({ data: user });
       }
     })
     .catch((err) => errorCatcher(err, res));
@@ -38,7 +38,7 @@ const createUser = (req, res) => {
       .status(BAD_DATA_REQUEST)
       .json({ message: "Avatar URL is required" });
   }
-  User.create({ name, avatar })
+  return User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => errorCatcher(err, res));
 };

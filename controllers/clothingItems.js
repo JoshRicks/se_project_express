@@ -1,5 +1,5 @@
-const ClothingItem = require("../models/clothingItem");
 const mongoose = require("mongoose");
+const ClothingItem = require("../models/clothingItem");
 
 const {
   BAD_DATA_REQUEST,
@@ -37,7 +37,7 @@ const createClothingItem = (req, res) => {
       .json({ message: "Image URL is required" });
   }
 
-  ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
+  return ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItems) => res.status(201).send({ data: clothingItems }))
     .catch((err) => errorCatcher(err, res));
 };
@@ -57,7 +57,7 @@ const deleteClothingItem = (req, res) => {
       .json({ message: "Invalid item ID format" });
   }
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .then((clothingItem) => {
       if (!clothingItem) {
         return res.status(NOT_FOUND).json({ message: "Item not Found" });
@@ -85,7 +85,7 @@ const likeItem = (req, res) => {
       .status(BAD_DATA_REQUEST)
       .json({ message: "Invalid item ID format" });
   }
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -112,7 +112,7 @@ const dislikeItem = (req, res) => {
       .status(BAD_DATA_REQUEST)
       .json({ message: "Invalid item ID format" });
   }
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
