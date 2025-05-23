@@ -9,9 +9,7 @@ const {
 
 const getClothingItem = (req, res) => {
   ClothingItem.find({})
-    .then((items) => {
-      return res.send(items);
-    })
+    .then((items) => res.send(items))
     .catch((err) => errorCatcher(err, res));
 };
 
