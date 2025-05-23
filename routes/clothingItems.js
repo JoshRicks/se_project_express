@@ -17,9 +17,4 @@ router.put("/:itemId/likes", likeItem);
 
 router.delete("/:itemId/likes", dislikeItem);
 
-router.use((req, res) => {
-  console.error();
-  res.status(404).send({ message: "Requested resource not found" });
-});
-
 module.exports = router;

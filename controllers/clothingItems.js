@@ -10,12 +10,7 @@ const {
 const getClothingItem = (req, res) => {
   ClothingItem.find({})
     .then((items) => {
-      if (!items || items.length === 0) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "No clothing items found" });
-      }
-      return res.status(200).send(items);
+      return res.send(items);
     })
     .catch((err) => errorCatcher(err, res));
 };

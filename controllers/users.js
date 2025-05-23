@@ -8,10 +8,7 @@ const {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      if (!users || users.length === 0) {
-        return res.status(NOT_FOUND).send({ message: "No users found" });
-      }
-      return res.status(200).send(users);
+      return res.send(users);
     })
     .catch((err) => errorCatcher(err, res));
 };
