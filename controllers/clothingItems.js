@@ -5,6 +5,7 @@ const {
   BAD_DATA_REQUEST,
   NOT_FOUND,
   errorCatcher,
+  PERMISSION_ERROR,
 } = require("../utils/errors");
 
 const getClothingItem = (req, res) => {
@@ -14,7 +15,6 @@ const getClothingItem = (req, res) => {
 };
 
 const createClothingItem = (req, res) => {
-  console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
   if (!req.body.name || req.body.name.trim() === "") {
     return res.status(BAD_DATA_REQUEST).json({ message: "Name is required" });
@@ -57,7 +57,7 @@ const deleteClothingItem = (req, res) => {
       }
       if (clothingItem.owner.toString() !== req.user._id) {
         return res
-          .status(BAD_DATA_REQUEST)
+          .status(PERMISSION_ERROR)
           .json({ message: "You do not have permission to delete this item" });
       }
       return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) => {

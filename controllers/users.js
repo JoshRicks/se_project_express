@@ -3,11 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-const {
-  BAD_DATA_REQUEST,
-  NOT_FOUND,
-  errorCatcher,
-} = require("../utils/errors");
+const { NOT_FOUND, errorCatcher } = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -15,8 +11,8 @@ const getUsers = (req, res) => {
     .catch((err) => errorCatcher(err, res));
 };
 
-const getUsersById = (req, res) => {
-  User.findById(req.params.userId)
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         res.status(NOT_FOUND).send({ message: "Requested user not found" });
@@ -28,7 +24,7 @@ const getUsersById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar, email, password } = req.body;
+  const { name, avatar, email } = req.body;
   return bcrypt
     .hash(req.body.password, 10)
     .then((hash) =>
@@ -39,7 +35,15 @@ const createUser = (req, res) => {
         avatar,
       })
     )
-    .then((user) => res.status(201).send(user))
+    .then((user) => {
+      const createdUser = {
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      };
+      res.status(201).send(createdUser);
+    })
     .catch((err) => errorCatcher(err, res));
 };
 const login = (req, res) => {
@@ -55,9 +59,32 @@ const login = (req, res) => {
     .catch((err) => errorCatcher(err, res));
 };
 
+const updateProfile = (req, res) => {
+  const { name, avatar } = req.body;
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).json({ message: "User not found" });
+      }
+      const updatedUser = {
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      };
+      return res.status(200).send(updatedUser);
+    })
+    .catch((err) => errorCatcher(err, res));
+};
+
 module.exports = {
   getUsers,
   createUser,
-  getUsersById,
+  getCurrentUser,
   login,
+  updateProfile,
 };
