@@ -1,6 +1,8 @@
 const BAD_DATA_REQUEST = 400;
 const NOT_FOUND = 404;
 const SERVER_ERROR = 500;
+const DUPLICATE_ERROR = 409;
+const AUTHORIZATION_ERROR = 401;
 
 const errorCatcher = (err, res) => {
   console.error(err);
@@ -15,6 +17,11 @@ const errorCatcher = (err, res) => {
   if (err.name === "ValidationError") {
     return res.status(BAD_DATA_REQUEST).send({ message: err.message });
   }
+  if (err.code === "E11000") {
+    return res
+      .status(DUPLICATE_ERROR)
+      .send({ message: "Email already exists in database" });
+  }
   return res
     .status(SERVER_ERROR)
     .send({ message: "An error occurred on the server" });
@@ -24,5 +31,6 @@ module.exports = {
   BAD_DATA_REQUEST,
   NOT_FOUND,
   SERVER_ERROR,
+  AUTHORIZATION_ERROR,
   errorCatcher,
 };

@@ -1,4 +1,8 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
+const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_DATA_REQUEST,
   NOT_FOUND,
@@ -24,17 +28,30 @@ const getUsersById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  if (!req.body.name || req.body.name.trim() === "") {
-    return res.status(BAD_DATA_REQUEST).json({ message: "Name is required" });
-  }
-  if (!req.body.avatar || req.body.avatar.trim() === "") {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Avatar URL is required" });
-  }
-  return User.create({ name, avatar })
+  const { name, avatar, email, password } = req.body;
+  return bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) =>
+      User.create({
+        email,
+        password: hash,
+        name,
+        avatar,
+      })
+    )
     .then((user) => res.status(201).send(user))
+    .catch((err) => errorCatcher(err, res));
+};
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
     .catch((err) => errorCatcher(err, res));
 };
 
@@ -42,4 +59,5 @@ module.exports = {
   getUsers,
   createUser,
   getUsersById,
+  login,
 };
