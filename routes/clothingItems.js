@@ -8,9 +8,9 @@ const {
 } = require("../controllers/clothingItems");
 const auth = require("../middlewares/auth");
 
-router.use(auth);
-
 router.get("/", getClothingItem);
+
+router.use(auth);
 
 router.post("/", createClothingItem);
 

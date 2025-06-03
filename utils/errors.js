@@ -23,16 +23,19 @@ const errorCatcher = (err, res) => {
       .status(DUPLICATE_ERROR)
       .send({ message: "Email already exists in database" });
   }
+  if (err.name === "AuthorizationError") {
+    return res.status(AUTHORIZATION_ERROR).send({ message: err.message });
+  }
   return res
     .status(SERVER_ERROR)
     .send({ message: "An error occurred on the server" });
 };
 
-class ValidationError extends Error {
+class AuthorizationError extends Error {
   constructor(message) {
     super(message);
-    this.name = "ValidationError";
-    this.statusCode = 400;
+    this.name = "AuthorizationError";
+    this.statusCode = 401;
   }
 }
 
@@ -43,5 +46,5 @@ module.exports = {
   AUTHORIZATION_ERROR,
   errorCatcher,
   PERMISSION_ERROR,
-  ValidationError,
+  AuthorizationError,
 };

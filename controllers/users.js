@@ -5,12 +5,6 @@ const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const { NOT_FOUND, errorCatcher } = require("../utils/errors");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => errorCatcher(err, res));
-};
-
 const getCurrentUser = (req, res) => {
   User.findById(req.user._id)
     .then((user) => {
@@ -82,7 +76,6 @@ const updateProfile = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   login,

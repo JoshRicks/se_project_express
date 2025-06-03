@@ -16,19 +16,6 @@ const getClothingItem = (req, res) => {
 
 const createClothingItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  if (!req.body.name || req.body.name.trim() === "") {
-    return res.status(BAD_DATA_REQUEST).json({ message: "Name is required" });
-  }
-  if (!req.body.weather || req.body.weather.trim() === "") {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Weather type is required" });
-  }
-  if (!req.body.imageUrl || req.body.imageUrl.trim() === "") {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Image URL is required" });
-  }
 
   return ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItems) => res.status(201).send({ data: clothingItems }))
