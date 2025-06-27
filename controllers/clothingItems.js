@@ -1,69 +1,58 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
-const {
-  BAD_DATA_REQUEST,
-  NOT_FOUND,
-  errorCatcher,
-  PERMISSION_ERROR,
-} = require("../utils/errors");
+const { ForbiddenError } = require("../utils/ForbiddenError");
+const { BadRequestError } = require("../utils/BadRequestError");
+const { NotFoundError } = require("../utils/NotFoundError");
 
-const getClothingItem = (req, res) => {
+const getClothingItem = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const createClothingItem = (req, res) => {
+const createClothingItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   return ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItems) => res.status(201).send({ data: clothingItems }))
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const deleteClothingItem = (req, res) => {
+const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!itemId) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Item ID is required" });
+    throw new BadRequestError("Item ID is required");
   }
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Invalid item ID format" });
+    throw new BadRequestError("invalid Item ID format");
   }
 
   return ClothingItem.findById(itemId)
     .then((clothingItem) => {
       if (!clothingItem) {
-        return res.status(NOT_FOUND).json({ message: "Item not Found" });
+        throw new NotFoundError("Item not Found");
       }
       if (clothingItem.owner.toString() !== req.user._id) {
-        return res
-          .status(PERMISSION_ERROR)
-          .json({ message: "You do not have permission to delete this item" });
+        throw new ForbiddenError(
+          "You do not have permission to delete this item"
+        );
       }
       return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) => {
         res.status(200).send({ data: deletedItem });
       });
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   if (!req.params.itemId) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Item ID is required" });
+    throw new BadRequestError("Item ID is required");
   }
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Invalid item ID format" });
+    throw new BadRequestError("invalid Item ID format");
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -72,25 +61,19 @@ const likeItem = (req, res) => {
   )
     .then((clothingItems) => {
       if (!clothingItems) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Requested clothing item not found" });
+        throw new NotFoundError("Requested clothing item not found");
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   if (!req.params.itemId) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Item ID is required" });
+    throw new BadRequestError("Item ID is required");
   }
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-    return res
-      .status(BAD_DATA_REQUEST)
-      .json({ message: "Invalid item ID format" });
+    throw new BadRequestError("invalid Item ID format");
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -99,13 +82,11 @@ const dislikeItem = (req, res) => {
   )
     .then((clothingItems) => {
       if (!clothingItems) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Requested clothing item not found" });
+        throw new NotFoundError("Requested clothing item not found");
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
 module.exports = {

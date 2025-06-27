@@ -3,21 +3,22 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-const { NOT_FOUND, errorCatcher } = require("../utils/errors");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { BadRequestError } = require("../utils/BadRequestError");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND).send({ message: "Requested user not found" });
+        throw new NotFoundError("Requested user not found");
       } else {
         res.status(200).send({ data: user });
       }
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email } = req.body;
   return bcrypt
     .hash(req.body.password, 10)
@@ -38,11 +39,15 @@ const createUser = (req, res) => {
       };
       res.status(201).send(createdUser);
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
-
+  if (!email) {
+    throw new BadRequestError("Email is required");
+  } else if (!password) {
+    throw new BadRequestError("Password is required");
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -50,10 +55,10 @@ const login = (req, res) => {
       });
       res.send({ token });
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   return User.findByIdAndUpdate(
     req.user._id,
@@ -62,7 +67,7 @@ const updateProfile = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).json({ message: "User not found" });
+        throw new NotFoundError("Requested user not found");
       }
       const updatedUser = {
         _id: user._id,
@@ -72,7 +77,7 @@ const updateProfile = (req, res) => {
       };
       return res.status(200).send(updatedUser);
     })
-    .catch((err) => errorCatcher(err, res));
+    .catch(next);
 };
 
 module.exports = {

@@ -1,50 +1,54 @@
-const BAD_DATA_REQUEST = 400;
-const NOT_FOUND = 404;
-const SERVER_ERROR = 500;
-const DUPLICATE_ERROR = 409;
-const AUTHORIZATION_ERROR = 401;
-const PERMISSION_ERROR = 403;
+const { ConflictError } = require("./ConflictError");
+const { NotFoundError } = require("./NotFoundError");
+const { AuthorizationError } = require("./AuthorizationError");
+const { ForbiddenError } = require("./ForbiddenError");
+const { BadRequestError } = require("./BadRequestError");
+const { ServerError } = require("./ServerError");
 
-const errorCatcher = (err, res) => {
+const errorHandler = (err, req, res, next) => {
   console.error(err);
   if (err.name === "MongooseServerSelectionError") {
+    const error = new ServerError(err.message);
     return res
-      .status(SERVER_ERROR)
+      .status(error.statusCode)
       .send({ message: "Database connection error" });
   }
   if (err.name === "CastError") {
-    return res.status(BAD_DATA_REQUEST).send({ message: err.message });
+    const error = new BadRequestError(err.message);
+    return res.status(error.statusCode).send({ message: error.message });
   }
   if (err.name === "ValidationError") {
-    return res.status(BAD_DATA_REQUEST).send({ message: err.message });
+    const error = new BadRequestError(err.message);
+    return res.status(error.statusCode).send({ message: error.message });
+  }
+  if (err.name === "BadRequestError") {
+    const error = new BadRequestError(err.message);
+    return res.status(error.statusCode).send({ message: error.message });
+  }
+  if (err.name === "NotFoundError") {
+    const error = new NotFoundError(err.message);
+    return res.status(error.statusCode).send({ message: error.message });
   }
   if (err.code === 11000) {
+    const error = new ConflictError(err.message);
     return res
-      .status(DUPLICATE_ERROR)
-      .send({ message: "Email already exists in database" });
+      .status(error.statusCode)
+      .json({ message: "Email already exists in database" });
   }
   if (err.name === "AuthorizationError") {
-    return res.status(AUTHORIZATION_ERROR).send({ message: err.message });
+    const error = new AuthorizationError(err.message);
+    return res.status(error.statusCode).json({ message: "Unauthorized" });
   }
+  if (err.name === "ForbiddenError") {
+    const error = new ForbiddenError(err.message);
+    return res.status(error.statusCode).json({ message: "Forbidden" });
+  }
+  const error = new ServerError(err.message);
   return res
-    .status(SERVER_ERROR)
+    .status(error.statusCode)
     .send({ message: "An error occurred on the server" });
 };
 
-class AuthorizationError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "AuthorizationError";
-    this.statusCode = 401;
-  }
-}
-
 module.exports = {
-  BAD_DATA_REQUEST,
-  NOT_FOUND,
-  SERVER_ERROR,
-  AUTHORIZATION_ERROR,
-  errorCatcher,
-  PERMISSION_ERROR,
-  AuthorizationError,
+  errorHandler,
 };
