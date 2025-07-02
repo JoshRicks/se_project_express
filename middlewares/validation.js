@@ -85,10 +85,17 @@ const validateId = celebrate({
   }),
 });
 
+const validateItemId = celebrate({
+  params: Joi.object().keys({
+    itemId: Joi.string().required().hex().length(24),
+  }),
+});
+
 module.exports = {
   validateItem,
   validateId,
   validateLogin,
   validateUser,
   validateProfileChanges,
+  validateItemId,
 };
