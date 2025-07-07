@@ -1,9 +1,16 @@
-const { ConflictError } = require("./ConflictError");
-const { NotFoundError } = require("./NotFoundError");
-const { AuthorizationError } = require("./AuthorizationError");
-const { ForbiddenError } = require("./ForbiddenError");
-const { BadRequestError } = require("./BadRequestError");
-const { ServerError } = require("./ServerError");
+const { ConflictError } = require("../utils/ConflictError");
+const { NotFoundError } = require("../utils/NotFoundError");
+const { AuthorizationError } = require("../utils/AuthorizationError");
+const { ForbiddenError } = require("../utils/ForbiddenError");
+const { BadRequestError } = require("../utils/BadRequestError");
+const { ServerError } = require("../utils/ServerError");
+
+const globalErrorHandler = (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? "An error occurred on the server" : message,
+  });
+};
 
 const errorHandler = (err, req, res, next) => {
   console.error(err);
@@ -43,12 +50,10 @@ const errorHandler = (err, req, res, next) => {
     const error = new ForbiddenError(err.message);
     return res.status(error.statusCode).json({ message: "Forbidden" });
   }
-  const error = new ServerError(err.message);
-  return res
-    .status(error.statusCode)
-    .send({ message: "An error occurred on the server" });
+  next(err);
 };
 
 module.exports = {
   errorHandler,
+  globalErrorHandler,
 };

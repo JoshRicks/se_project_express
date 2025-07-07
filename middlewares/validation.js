@@ -43,8 +43,7 @@ const validateUser = celebrate({
       "string.email": "Please provide a valid email address",
       "any.required": "Email field is required",
     }),
-    password: Joi.string().required().min(8).messages({
-      "string.min": 'The minimum length of the "password" field is 8',
+    password: Joi.string().required().messages({
       "string.empty": 'The "password" field must be filled in',
     }),
   }),
@@ -57,8 +56,7 @@ const validateLogin = celebrate({
       "string.email": "Please provide a valid email address",
       "any.required": "Email field is required",
     }),
-    password: Joi.string().required().min(8).messages({
-      "string.min": 'The minimum length of the "password" field is 8',
+    password: Joi.string().required().messages({
       "string.empty": 'The "password" field must be filled in',
     }),
   }),

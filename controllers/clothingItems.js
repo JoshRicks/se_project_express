@@ -23,7 +23,7 @@ const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!itemId) {
-    throw new BadRequestError("Item ID is required");
+    throw new NotFoundError("Item ID is required");
   }
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {

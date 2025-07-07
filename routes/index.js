@@ -6,12 +6,9 @@ const { NotFoundError } = require("../utils/NotFoundError");
 router.use("/items", clothingRouter);
 router.use("/", userRouter);
 
-router.use((req, res, err) => {
+router.use((req, res) => {
   console.error();
-  const error = new NotFoundError(err.message);
-  res
-    .status(error.statusCode)
-    .send({ message: "Requested resource not found" });
+  throw new NotFoundError("Requested resource not found");
 });
 
 module.exports = router;

@@ -19,7 +19,7 @@ router.use(auth);
 
 router.post("/", validateItem, createClothingItem);
 
-router.delete("/:itemId", validateId, deleteClothingItem);
+router.delete("/:itemId", validateItemId, deleteClothingItem);
 
 router.put("/:itemId/likes", validateItemId, likeItem);
 

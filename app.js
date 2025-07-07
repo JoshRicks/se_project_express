@@ -5,7 +5,7 @@ const cors = require("cors");
 const { errors } = require("celebrate");
 
 const routes = require("./routes/index");
-const { errorHandler } = require("./utils/errors");
+const { globalErrorHandler, errorHandler } = require("./middlewares/errors");
 const { errorLogger, requestLogger } = require("./middlewares/logger");
 
 const { PORT = 3001 } = process.env;
@@ -31,6 +31,8 @@ app.use(errorLogger);
 app.use(errors());
 
 app.use(errorHandler);
+
+app.use(globalErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`server listening on ${PORT}`);
