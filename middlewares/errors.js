@@ -50,7 +50,7 @@ const errorHandler = (err, req, res, next) => {
     const error = new ForbiddenError(err.message);
     return res.status(error.statusCode).json({ message: "Forbidden" });
   }
-  next(err);
+  return next(err);
 };
 
 module.exports = {

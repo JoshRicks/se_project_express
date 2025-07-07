@@ -6,7 +6,7 @@ const { NotFoundError } = require("../utils/NotFoundError");
 router.use("/items", clothingRouter);
 router.use("/", userRouter);
 
-router.use((req, res) => {
+router.use(() => {
   console.error();
   throw new NotFoundError("Requested resource not found");
 });
