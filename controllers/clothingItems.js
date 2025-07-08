@@ -4,11 +4,18 @@ const ClothingItem = require("../models/clothingItem");
 const { ForbiddenError } = require("../utils/ForbiddenError");
 const { BadRequestError } = require("../utils/BadRequestError");
 const { NotFoundError } = require("../utils/NotFoundError");
+const { AuthorizationError } = require("../utils/AuthorizationError");
 
 const getClothingItem = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("Item not found"));
+      }
+      return next(err);
+    });
 };
 
 const createClothingItem = (req, res, next) => {
@@ -16,7 +23,19 @@ const createClothingItem = (req, res, next) => {
 
   return ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((clothingItems) => res.status(201).send({ data: clothingItems }))
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      return next(err);
+    });
 };
 
 const deleteClothingItem = (req, res, next) => {
@@ -44,7 +63,25 @@ const deleteClothingItem = (req, res, next) => {
         res.status(200).send({ data: deletedItem });
       });
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("Item not found"));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      if (err.name === "ForbiddenError") {
+        return next(new ForbiddenError("Forbidden"));
+      }
+      return next(err);
+    });
 };
 
 const likeItem = (req, res, next) => {
@@ -65,7 +102,22 @@ const likeItem = (req, res, next) => {
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("Item not found"));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      if (err.name === "ForbiddenError") {
+        return next(new ForbiddenError("Forbidden"));
+      }
+      return next(err);
+    });
 };
 
 const dislikeItem = (req, res, next) => {
@@ -86,7 +138,22 @@ const dislikeItem = (req, res, next) => {
       }
       return res.status(200).send({ data: clothingItems });
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("Item not found"));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      if (err.name === "ForbiddenError") {
+        return next(new ForbiddenError("Forbidden"));
+      }
+      return next(err);
+    });
 };
 
 module.exports = {

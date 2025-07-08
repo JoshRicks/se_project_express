@@ -5,6 +5,8 @@ const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const { NotFoundError } = require("../utils/NotFoundError");
 const { BadRequestError } = require("../utils/BadRequestError");
+const { ConflictError } = require("../utils/ConflictError");
+const { AuthorizationError } = require("../utils/AuthorizationError");
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
@@ -15,7 +17,13 @@ const getCurrentUser = (req, res, next) => {
         res.status(200).send({ data: user });
       }
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      return next(err);
+    });
 };
 
 const createUser = (req, res, next) => {
@@ -39,7 +47,21 @@ const createUser = (req, res, next) => {
       };
       res.status(201).send(createdUser);
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.code === 11000) {
+        return next(
+          new ConflictError({ message: "Email already exists in database" })
+        );
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      return next(err);
+    });
 };
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -55,7 +77,22 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("User not found"));
+      }
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      return next(err);
+    });
 };
 
 const updateProfile = (req, res, next) => {
@@ -77,7 +114,22 @@ const updateProfile = (req, res, next) => {
       };
       return res.status(200).send(updatedUser);
     })
-    .catch(next);
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "NotFoundError") {
+        return next(new NotFoundError("User not found"));
+      }
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "BadRequestError") {
+        return next(new BadRequestError({ message: err.message }));
+      }
+      if (err.name === "AuthorizationError") {
+        return next(new AuthorizationError("Unauthorized"));
+      }
+      return next(err);
+    });
 };
 
 module.exports = {
