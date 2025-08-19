@@ -12,14 +12,6 @@ const {
   validateProfileChanges,
 } = require("../middlewares/validation");
 
-router.get("/crash-test", (req, res) => {
-  res.send("Server is about to crash...");
-
-  setTimeout(() => {
-    process.exit(1);
-  }, 100);
-});
-
 router.post("/signin", validateLogin, login);
 router.post("/signup", validateUser, createUser);
 
