@@ -21,4 +21,4 @@ This back-end project is focused on creating a server for the WTWR application. 
 
 ## Plan on improving the project
 
-The eventual goal is to create a server with an API and user authorization which will be implemented over the next few weeks.
+Expand on Database Functionality.
