@@ -8,6 +8,7 @@ This back-end project is focused on creating a server for the WTWR application. 
 - ES lint
 - MongoDB
 - Express.js
+- Validation
 
 # Where can you find this project
 
