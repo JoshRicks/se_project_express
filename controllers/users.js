@@ -117,7 +117,7 @@ const updateProfile = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "NotFoundError") {
-        return next(new NotFoundError("User not found"));
+        return next(new NotFoundError("User was not found"));
       }
       if (err.name === "ValidationError") {
         return next(new BadRequestError({ message: err.message }));
